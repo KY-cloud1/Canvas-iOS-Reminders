@@ -104,7 +104,8 @@ class CanvasApiAssignments:
     def parse_assignments_due(self, assignments: dict) -> list[dict]:
         '''
         Parses given assignments by only selecting the ones that have
-        a due date on or after the current day.
+        a due date on or after the current day and no later than the
+        delta weeks from the current date.
         
         assignments represents the data received from the Canvas API.
 
@@ -112,9 +113,15 @@ class CanvasApiAssignments:
         due dates on or after the current day.
         '''
 
+        # Represents the number of weeks in the future to consider
+        # for assignments with due dates.
+        WEEKS_DELTA = 2
+
         due_assignments = []
 
         curr_date = datetime.datetime.now(datetime.timezone.utc)
+
+        weeks_future = curr_date + datetime.timedelta(weeks= WEEKS_DELTA)
 
         for course in assignments['data']['allCourses']:
             for assignment in course['assignmentsConnection']['nodes']:
@@ -128,7 +135,7 @@ class CanvasApiAssignments:
                 due_date_dt = datetime.datetime.fromisoformat(
                     assignment_due_date.replace("Z", "+00:00"))
 
-                if due_date_dt >= curr_date:
+                if due_date_dt >= curr_date and due_date_dt <= weeks_future:
                     due_assignments.append({
                         "course": course['name'],
                         "assignment": assignment['name'],
@@ -136,7 +143,6 @@ class CanvasApiAssignments:
                         })
 
         return due_assignments
-
 
 
 def run():
