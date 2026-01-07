@@ -6,6 +6,7 @@ using the Canvas GraphQL API.
 '''
 
 
+import datetime
 import json
 import urllib.request
 
@@ -29,7 +30,7 @@ class CanvasApiAssignments:
         self._token = TOKEN  # CURRENTLY HARDCODED
 
 
-    def get_assignments(self) -> dict | None:
+    def get_all_assignments(self) -> dict | None:
         '''
         Fetches all assignments in the current Canvas courses.
         
@@ -100,12 +101,41 @@ class CanvasApiAssignments:
             return None
         
 
-    def parse_assignments(self, assignments: dict) -> dict:
+    def parse_assignments_due(self, assignments: dict) -> list[dict]:
         '''
-        Parses given assignments by 
+        Parses given assignments by only selecting the ones that have
+        a due date on or after the current day.
         
-        
+        assignments represents the data received from the Canvas API.
+
+        Returns a list of dict containing only assignments that have 
+        due dates on or after the current day.
         '''
+
+        due_assignments = []
+
+        curr_date = datetime.datetime.now(datetime.timezone.utc)
+
+        for course in assignments['data']['allCourses']:
+            for assignment in course['assignmentsConnection']['nodes']:
+                assignment_due_date = assignment.get("dueAt")
+
+                if not assignment_due_date:
+                    continue
+
+                # Convert assignment due date from ISO 8601 string into
+                # datetime.datetime object in UTC for comparison.
+                due_date_dt = datetime.datetime.fromisoformat(
+                    assignment_due_date.replace("Z", "+00:00"))
+
+                if due_date_dt >= curr_date:
+                    due_assignments.append({
+                        "course": course['name'],
+                        "assignment": assignment['name'],
+                        "dueAt": assignment_due_date
+                        })
+
+        return due_assignments
 
 
 
@@ -116,9 +146,14 @@ def run():
 
     canvas_scraper = CanvasApiAssignments("jkl;")
 
-    assignments = canvas_scraper.get_assignments()
+    assignments = canvas_scraper.get_all_assignments()
 
-    print(assignments)
+    if not assignments:
+        return
+
+    sorted_assignments = canvas_scraper.parse_assignments_due(assignments)
+
+    print(sorted_assignments)
 
 
 if __name__ == '__main__':
