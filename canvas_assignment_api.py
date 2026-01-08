@@ -1,7 +1,7 @@
 # canvas_assignment_api.py
 
 '''
-This module contains a class that gets upcoming assignments from 
+This module contains a class that gets upcoming assignments from
 the UCI Canvas using the Canvas GraphQL API.
 '''
 
@@ -13,6 +13,10 @@ import urllib.request
 
 # Canvas API Access Token goes here in the quotes.
 TOKEN = ""
+
+# URL specifically for Canvas used by UCI students.
+# This will need to be changed for different schools.
+BASE_URL = "https://canvas.eee.uci.edu/api/graphql"
 
 
 class CanvasApiAssignments:
@@ -29,7 +33,8 @@ class CanvasApiAssignments:
         token represents a Canvas access token.
         '''
 
-        # TOKEN is currently hardcoded at top of module.
+        # TOKEN is currently hardcoded at top of module, leaving the
+        # token parameter unused.
         self._token = TOKEN
 
 
@@ -44,10 +49,7 @@ class CanvasApiAssignments:
         is invalid.
         '''
 
-        # URL specifically for Canvas used by UCI students.
-        # This will need to be changed for different schools.
-        BASE_URL = "https://canvas.eee.uci.edu/api/graphql"
-
+        # Canvas GraphQL query.
         query = '''
         query AllUpcomingAssignments {
             allCourses {
@@ -63,12 +65,12 @@ class CanvasApiAssignments:
         
         '''
 
+        data = json.dumps({"query": query}).encode("utf-8")
+
         headers = {
             "Authorization": f"Bearer {self._token}",
             "Content-Type": "application/json"
             }
-
-        data = json.dumps({"query": query}).encode("utf-8")
 
         try:
             request = urllib.request.Request(BASE_URL, 
@@ -105,28 +107,28 @@ class CanvasApiAssignments:
             return None
         
 
-    def filter_assignments_due(self, assignments: dict) -> list[dict]:
+    def filter_assignments_due(self, assignments: dict, 
+                               weeks_delta: int) -> list[dict]:
         '''
         Filters given assignments by only selecting the ones that have
         a due date on or after the current day and no later than the
-        delta weeks from the current date.
+        weeks delta from the current date.
         
         assignments represents the data received from the Canvas API.
 
+        weeks_delta represents the number of weeks into the future from
+        the current date.
+
         Returns a list of dicts containing only assignments that have
         due dates on or after the current day and no later than the
-        delta weeks from the current day.
+        weeks delta from the current day.
         '''
-
-        # Represents the number of weeks in the future to consider
-        # for assignments with due dates.
-        WEEKS_DELTA = 2
 
         due_assignments = []
 
         curr_date = datetime.datetime.now(datetime.timezone.utc)
 
-        weeks_future = curr_date + datetime.timedelta(weeks= WEEKS_DELTA)
+        weeks_future = curr_date + datetime.timedelta(weeks = weeks_delta)
 
         for course in assignments['data']['allCourses']:
             for assignment in course['assignmentsConnection']['nodes']:
@@ -157,6 +159,10 @@ def run():
     token and prints it into the console.
     '''
 
+    # Represents the number of weeks in the future to consider
+    # for assignments with due dates.
+    WEEKS_DELTA = 2
+
     # TOKEN is currently hardcoded at top of program.
     canvas_api = CanvasApiAssignments(TOKEN)
 
@@ -165,7 +171,8 @@ def run():
     if not assignments:
         return
 
-    sorted_assignments = canvas_api.filter_assignments_due(assignments)
+    sorted_assignments = canvas_api.filter_assignments_due(assignments, 
+                                                           WEEKS_DELTA)
 
     print(sorted_assignments)
 
