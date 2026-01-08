@@ -27,7 +27,8 @@ class CanvasApiAssignments:
         token represents a Canvas access token.
         '''
 
-        self._token = token
+        # TOKEN is currently hardcoded at top of module.
+        self._token = TOKEN
 
 
     def get_all_assignments(self) -> dict | None:
@@ -155,14 +156,14 @@ def run():
     '''
 
     # TOKEN is currently hardcoded at top of program.
-    canvas_scraper = CanvasApiAssignments(TOKEN)
+    canvas_api = CanvasApiAssignments(TOKEN)
 
-    assignments = canvas_scraper.get_all_assignments()
+    assignments = canvas_api.get_all_assignments()
 
     if not assignments:
         return
 
-    sorted_assignments = canvas_scraper.parse_assignments_due(assignments)
+    sorted_assignments = canvas_api.parse_assignments_due(assignments)
 
     print(sorted_assignments)
 
