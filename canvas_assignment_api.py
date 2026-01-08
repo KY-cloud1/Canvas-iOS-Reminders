@@ -1,4 +1,4 @@
-# Canvas Assignments Scraper
+# canvas_assignment_api.py
 
 '''
 This module contains a class that gets upcoming assignments from 
@@ -102,7 +102,7 @@ class CanvasApiAssignments:
             return None
         
 
-    def parse_assignments_due(self, assignments: dict) -> str:
+    def parse_assignments_due(self, assignments: dict) -> list[dict]:
         '''
         Parses given assignments by only selecting the ones that have
         a due date on or after the current day and no later than the
@@ -110,7 +110,7 @@ class CanvasApiAssignments:
         
         assignments represents the data received from the Canvas API.
 
-        Returns a JSON string containing only assignments that have
+        Returns a list of dicts containing only assignments that have
         due dates on or after the current day and no later than the
         delta weeks from the current day.
         '''
@@ -144,9 +144,8 @@ class CanvasApiAssignments:
                         "dueAt": assignment_due_date
                         })
 
-        assignments_json_str = json.dumps(due_assignments, indent= 2)
 
-        return assignments_json_str
+        return due_assignments
 
 
 def run():
