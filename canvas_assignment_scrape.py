@@ -1,8 +1,8 @@
 # Canvas Assignments Scraper
 
 '''
-This module contains a class that scrapes assignments from Canvas 
-using the Canvas GraphQL API.
+This module contains a class that gets upcoming assignments from 
+the UCI Canvas using the Canvas GraphQL API.
 '''
 
 
@@ -15,8 +15,8 @@ TOKEN = ""
 
 class CanvasApiAssignments:
     '''
-    Contains methods that fetches and manages assignments from the
-    Canvas GraphQL API.
+    Contains methods that fetch assignments from the Canvas 
+    GraphQL API.
     '''
 
     def __init__(self, token: str) -> None:
@@ -24,10 +24,10 @@ class CanvasApiAssignments:
         Initializes a CanvasApiAssignments object by setting the
         user's personal Canvas token.
         
-        token represents the given Canvas access token.
+        token represents a Canvas access token.
         '''
 
-        self._token = TOKEN  # CURRENTLY HARDCODED
+        self._token = token
 
 
     def get_all_assignments(self) -> dict | None:
@@ -37,7 +37,7 @@ class CanvasApiAssignments:
         Returns a dictionary containing all of the assignments with
         names, ids, and due dates.
 
-        Returns None if the Canvas API call failed or call result
+        Returns None if the Canvas API call failed or the call result
         is invalid.
         '''
 
@@ -109,7 +109,8 @@ class CanvasApiAssignments:
         assignments represents the data received from the Canvas API.
 
         Returns a JSON string containing only assignments that have
-        due dates on or after the current day.
+        due dates on or after the current day and no later than the
+        delta weeks from the current day.
         '''
 
         # Represents the number of weeks in the future to consider
@@ -148,10 +149,12 @@ class CanvasApiAssignments:
 
 def run():
     '''
-    Docstring for main
+    Gets upcoming assignments from a user's UCI Canvas using their
+    token and prints it into the console.
     '''
 
-    canvas_scraper = CanvasApiAssignments("jkl;")
+    # TOKEN is currently hardcoded at top of program.
+    canvas_scraper = CanvasApiAssignments(TOKEN)
 
     assignments = canvas_scraper.get_all_assignments()
 
