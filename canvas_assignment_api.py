@@ -10,6 +10,8 @@ import datetime
 import json
 import urllib.request
 
+
+# Canvas API Access Token goes here in the quotes.
 TOKEN = ""
 
 
@@ -103,9 +105,9 @@ class CanvasApiAssignments:
             return None
         
 
-    def parse_assignments_due(self, assignments: dict) -> list[dict]:
+    def filter_assignments_due(self, assignments: dict) -> list[dict]:
         '''
-        Parses given assignments by only selecting the ones that have
+        Filters given assignments by only selecting the ones that have
         a due date on or after the current day and no later than the
         delta weeks from the current date.
         
@@ -163,7 +165,7 @@ def run():
     if not assignments:
         return
 
-    sorted_assignments = canvas_api.parse_assignments_due(assignments)
+    sorted_assignments = canvas_api.filter_assignments_due(assignments)
 
     print(sorted_assignments)
 
